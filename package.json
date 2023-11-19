@@ -1,7 +1,7 @@
 {
   "name": "distore",
   "version": "1.0.0",
-  "description": "Store files in Discord!",
+  "description": "Fast, unlimited & encrypted storage using Discord!",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,6 +19,9 @@
     "download",
     "upload"
   ],
+  "bin": {
+    "distore": "./bin/distore.js"
+  },
   "author": "Sayan J. Das",
   "license": "MIT",
   "bugs": {
