@@ -7,6 +7,8 @@ const program = new Command();
 
 (async () => {
 
+    const ora = (await import('ora')).default;
+    
     // Initialize configuration
     await api.config.init();
 
@@ -34,7 +36,30 @@ const program = new Command();
     .action(async (filepath, destination) => {
         if(typeof destination == "undefined") destination = `/` + path.basename(filepath);
 
-        let file = await api.fileManager.uploadFile(path.resolve(filepath), destination);
+        // Initialize spinner
+        let spinner = ora('Queueing jobs');
+        let chunks = 0;
+        let chunksDone = 0;
+
+        let file = await api.fileManager.uploadFile(path.resolve(filepath), destination, (type, data) => {
+            if(type === 'start') {
+                chunks = data.chunks;
+                spinner.start();
+            }
+            if(type === 'registerfile') {
+                spinner.text = `Registering file to database`;
+            }
+            if(type === 'chunkupload') {
+                spinner.text = `Uploading chunks [${chunksDone}/${chunks}]`;
+            }
+            if(type === 'chunkuploaded') {
+                chunksDone++;
+                spinner.text = `Uploading chunks [${chunksDone}/${chunks}]`;
+            }
+            if(type === 'end') {
+                spinner.succeed(`Uploaded to \`${data.destination}\` in virtual filesystem`);
+            }
+        });
     });
 
     // Download command
@@ -50,7 +75,28 @@ const program = new Command();
             return api.console.error(`No file exists at \`${filepath}\`!`);
         }
 
-        let file = await api.fileManager.downloadFile(fileMeta.key, destination);
+        // Initialize spinner
+        let spinner = ora('Queueing jobs');
+        let chunks = 0;
+        let chunksDone = 0;
+
+        // Begin download
+        let file = await api.fileManager.downloadFile(fileMeta.key, destination, (type, data) => {
+            if(type === 'start') {
+                chunks = data.chunks;
+                spinner.start();
+            }
+            if(type === 'chunkdownload') {
+                spinner.text = `Downloading chunks [${chunksDone}/${chunks}]`;
+            }
+            if(type === 'chunkdownloaded') {
+                chunksDone++;
+                spinner.text = `Downloading chunks [${chunksDone}/${chunks}]`;
+            }
+            if(type === 'end') {
+                spinner.succeed(`Saved to ${data.path}`);
+            }
+        });
     });
 
     // Start parsing CLI commands
