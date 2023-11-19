@@ -27,6 +27,8 @@
   "homepage": "https://github.com/theseyan/distore#readme",
   "dependencies": {
     "axios": "^1.6.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
     "deta": "^2.0.0",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
