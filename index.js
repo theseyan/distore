@@ -1,6 +1,9 @@
+const chalk = require('chalk');
 const api = require('./lib/api');
 const { Command } = require('commander');
 const path = require('path');
+const {performance} = require('perf_hooks');
+const {formatTime, formatSize} = require('./lib/util');
 
 // Create new Commander instance
 const program = new Command();
@@ -41,6 +44,10 @@ const program = new Command();
         let spinner = ora('Queueing jobs');
         let chunks = 0;
         let chunksDone = 0;
+        let avg = 0;
+
+        // Measure time start
+        let startTime = performance.now();
 
         let file = await api.fileManager.uploadFile(path.resolve(filepath), destination, options.parallel, (type, data) => {
             if(type === 'start') {
@@ -54,11 +61,16 @@ const program = new Command();
                 spinner.text = `Uploading chunks [${chunksDone}/${chunks}]`;
             }
             if(type === 'chunkuploaded') {
+                // Update average upload speed
+                avg = ((avg * chunksDone) + data.avgSpeed) / (chunksDone + 1);
                 chunksDone++;
                 spinner.text = `Uploading chunks [${chunksDone}/${chunks}]`;
             }
             if(type === 'end') {
-                spinner.succeed(`Uploaded to \`${data.destination}\` in virtual filesystem`);
+                // Compute elapsed time in ms
+                let elapsed = performance.now() - startTime;
+
+                spinner.succeed(`Uploaded to \`${data.destination}\` in virtual filesystem ` + chalk.gray(`(${formatTime(elapsed)}, ${formatSize(avg)}/sec)`));
             }
         });
     });
@@ -72,31 +84,93 @@ const program = new Command();
     .action(async (filepath, destination, options) => {
         if(typeof destination == "undefined") destination = path.resolve('./', path.basename(filepath));
     
+        // Initialize spinner
+        let spinner = ora('Fetching file metadata');
+        spinner.start();
+        let chunks = 0;
+        let chunksDone = 0;
+        let avg = 0;
+
         let fileMeta = await api.db.getFileFromPath(filepath);
         if(fileMeta === null) {
+            spinner.stop();
             return api.console.error(`No file exists at \`${filepath}\`!`);
         }
 
-        // Initialize spinner
-        let spinner = ora('Queueing jobs');
-        let chunks = 0;
-        let chunksDone = 0;
+        // Clear the spinner so text doesn't overlap
+        spinner.stop();
+
+        // Measure time start
+        let startTime = performance.now();
 
         // Begin download
         let file = await api.fileManager.downloadFile(fileMeta.key, destination, options.parallel, (type, data) => {
             if(type === 'start') {
-                chunks = data.chunks;
+                spinner.text = 'Queueing jobs';
                 spinner.start();
+                chunks = data.chunks;
             }
             if(type === 'chunkdownload') {
                 spinner.text = `Downloading chunks [${chunksDone}/${chunks}]`;
             }
             if(type === 'chunkdownloaded') {
+                // Update average upload speed
+                avg = ((avg * chunksDone) + data.avgSpeed) / (chunksDone + 1);
                 chunksDone++;
                 spinner.text = `Downloading chunks [${chunksDone}/${chunks}]`;
             }
             if(type === 'end') {
-                spinner.succeed(`Saved to ${data.path}`);
+                // Compute elapsed time in ms
+                let elapsed = performance.now() - startTime;
+
+                spinner.succeed(`Saved to ${data.path} ` + chalk.gray(`(${formatTime(elapsed)}, ${formatSize(avg)}/sec)`));
+            }
+        });
+    });
+
+    // Delete command
+    program.command('delete')
+    .description('Deletes a file in the virtual filesystem')
+    .argument('<path>', 'Path to file on virtual filesystem')
+    .action(async (filepath) => {
+        // Initialize spinner
+        let spinner = ora('Fetching chunk list');
+        spinner.start();
+        let chunks = 0;
+        let chunksDone = 0;
+
+        let fileMeta = await api.db.getFileFromPath(filepath);
+        if(fileMeta === null) {
+            spinner.stop();
+            return api.console.error(`No file exists at \`${filepath}\`!`);
+        }
+
+        // Clear the spinner so text doesn't overlap
+        spinner.stop();
+
+        // Measure time start
+        let startTime = performance.now();
+
+        // Begin deletion
+        await api.db.deleteFile(fileMeta.key, (type, data) => {
+            if(type === 'start') {
+                spinner.text = 'Fetching chunk list';
+                spinner.start();
+            }
+            if(type === 'fetchchunks') {
+                chunks = data.chunksList.length;
+            }
+            if(type === 'chunkdelete') {
+                spinner.text = `Deleting chunk ${chalk.gray(data.key)} [${chunksDone}/${chunks}]`;
+            }
+            if(type === 'chunkdeleted') {
+                chunksDone++;
+            }
+            if(type === 'end') {
+                // Compute elapsed time in ms
+                let elapsed = performance.now() - startTime;
+
+                spinner.succeed(`Deleted \`${fileMeta.name}\` ` + chalk.gray(`(${formatTime(elapsed)})`));
             }
         });
     });
