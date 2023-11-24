@@ -43,6 +43,8 @@ Commands:
   help [command]                           display help for command
 ```
 
+**Note:** Paths in the virtual filesystem must follow Unix path syntax (for eg. `/Movies/Jurassic Park.mp4`). This does not apply to local files, which may use the OS-specific path syntax.
+
 ## Why?
 - Discord has no limits on file storage in a server
 - Bypasses 25MiB file size limit by splitting files into chunks
