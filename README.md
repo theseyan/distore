@@ -38,6 +38,7 @@ Options:
 Commands:
   upload [options] <path> [destination]    Uploads a file to the virtual filesystem
   download [options] <path> [destination]  Downloads a file from the virtual filesystem to disk
+  delete <path>                            Deletes a file in the virtual filesystem
   config <item> <value>                    Updates the configuration file
   help [command]                           display help for command
 ```
