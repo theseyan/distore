@@ -5,7 +5,7 @@
     <br><br>
 </div>
 
-Distore is a CLI tool to use Discord as an encrypted virtual filesystem.<br>
+Distore is a CLI tool to use Discord as your own encrypted file storage.<br>
 It can also be consumed as a library through the [API](https://github.com/theseyan/distore/blob/main/lib/api.js).
 
 ## Get Started
@@ -46,13 +46,13 @@ Commands:
 ## Why?
 - Discord has no limits on file storage in a server
 - Bypasses 25MiB file size limit by splitting files into chunks
-- End-to-end encryption using 256 bit AES-GCM (Discord does **not** use E2EE)
+- End-to-end encryption using 256 bit AES-GCM (Discord by default does **not** have E2EE)
 - Guarantees file integrity and no tampering
 - Parallely uploads/downloads chunks for maximising bandwidth
 
 ## Caveats
-- There is no guarantee that Discord will continue hosting files for free forever
-- Due to end-to-end encryption, files are not monitored and it is up to the user to scan downloaded third-party content for malware
+- **Do not** save sensitive, important files in Discord for archival, as Discord reserves the right to delete messages/servers/accounts at any time.
+- **Do not** share your configuration file with untrusted third parties; Doing so will allow them full access to your virtual filesystem.
 
 ## License
 Released under the [MIT](https://raw.githubusercontent.com/theseyan/distore/main/LICENSE.md) License.
