@@ -1,7 +1,7 @@
 <div align="center">
     <br>
     <h1>Distore</h1><br>
-    <i>Fast, unlimited, encrypted storage on Discord!</i>
+    <i>Fast, unlimited, encrypted storage on Discord</i>
     <br><br>
 </div>
 
@@ -10,15 +10,21 @@ It can also be consumed as a library through the [API](https://github.com/thesey
 
 ## Get Started
 
-- Install with npm:
+1) Install with npm:
 ```
-npm i distore
+npm i -g distore
 ```
+<br>
 
-- Run `distore` the first time to auto-generate an encryption key & configuration file `.distore/config.json` in your home directory.<br>
-Distore requires a [Discord Webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) and a [Deta Base](https://deta.space/docs/en/use/your-data/collections) collection key to work. You must update these entries in the configuration file before proceeding to the next step.
+2) Run `distore` the first time to auto-generate an encryption key & configuration file `.distore/config.json` in your home directory.<br>
+Distore requires a [Discord Webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) and a [Deta Base](https://deta.space/docs/en/use/your-data/collections) collection key to work. You must update these entries in the configuration file before proceeding to the next step, or use the CLI:
+```console
+distore config deta_api_key <YOUR_KEY>
+distore config webhook <YOUR_URL>
+```
+<br>
 
-- Run `distore help` to get a list of commands and usage:
+3) Run `distore help` to get a list of commands and usage:
 
 ```console
 Usage: Distore [options] [command]
