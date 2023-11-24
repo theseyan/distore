@@ -175,6 +175,31 @@ const program = new Command();
         });
     });
 
+    // List command
+    program.command('ls')
+    .description('Lists files in a directory')
+    .argument('[path]', 'Path to directory in virtual filesystem', '/')
+    .action(async (dirpath) => {
+        console.log(chalk.blueBright("list"), dirpath);
+
+        let spinner = ora('Fetching files list');
+        spinner.start();
+        
+        // Fetch list of files
+        let {files, dirs} = await api.db.listDirectory(dirpath);
+
+        // Handle empty list
+        if(files.length < 1 && dirs.length < 1) return spinner.info(`Empty directory or directory does not exist`);
+        else spinner.stop();
+        
+        for(let dir of dirs) {
+            console.log(`📁`, chalk.yellowBright(path.basename(dir.key)));
+        }
+        for(let file of files) {
+            console.log(`-`, file.name, chalk.gray(`(${formatSize(file.size)})`));
+        }
+    });
+
     // Config command
     program.command('config')
     .description('Updates the configuration file')
