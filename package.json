@@ -1,6 +1,6 @@
 {
   "name": "distore",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Fast, unlimited & encrypted storage using Discord!",
   "main": "index.js",
   "scripts": {
