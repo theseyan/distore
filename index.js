@@ -25,9 +25,6 @@ const program = new Command();
 
     // Initialize database
     api.db.init();
-
-    await server.start();
-    return;
     
     // Initialize CLI program
     program
@@ -224,6 +221,20 @@ const program = new Command();
         for(let file of files) {
             console.log(`-`, chalk.yellowBright(file.path + `/`) + file.name, chalk.gray(`(${formatSize(file.size)})`));
         }
+    });
+
+    // Serve command
+    program.command('serve')
+    .description('Starts an HTTP server for serving files from the virtual filesystem')
+    .argument('[port]', 'Port to run on', 3000)
+    .action(async (port) => {
+        let spinner = ora('Starting server');
+        spinner.start();
+
+        // Start the server
+        await server.start(port);
+
+        spinner.succeed(`Server running on http://127.0.0.1:${port}`);
     });
 
     // Config command
