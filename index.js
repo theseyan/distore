@@ -4,6 +4,7 @@ const { Command } = require('commander');
 const path = require('path');
 const {performance} = require('perf_hooks');
 const {formatTime, formatSize} = require('./lib/util');
+const server = require('./lib/serve');
 
 // Create new Commander instance
 const program = new Command();
@@ -25,6 +26,9 @@ const program = new Command();
     // Initialize database
     api.db.init();
 
+    await server.start();
+    return;
+    
     // Initialize CLI program
     program
         .name('Distore')
@@ -197,6 +201,28 @@ const program = new Command();
         }
         for(let file of files) {
             console.log(`-`, file.name, chalk.gray(`(${formatSize(file.size)})`));
+        }
+    });
+
+    // Search command
+    program.command('search')
+    .description('Search for files')
+    .argument('<name>', 'Name of file to search for')
+    .action(async (name) => {
+        console.log(chalk.blueBright("search"), name);
+
+        let spinner = ora('Searching');
+        spinner.start();
+        
+        // Fetch list of files
+        let files = await api.db.searchFile(name);
+
+        // Handle empty list
+        if(files.length < 1) return spinner.info(`No files found for this search query`);
+        else spinner.stop();
+        
+        for(let file of files) {
+            console.log(`-`, chalk.yellowBright(file.path + `/`) + file.name, chalk.gray(`(${formatSize(file.size)})`));
         }
     });
 
