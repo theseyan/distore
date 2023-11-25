@@ -30,7 +30,7 @@ const program = new Command();
     program
         .name('Distore')
         .description('Fast, unlimited, encrypted storage on Discord')
-        .version('1.0.0');
+        .version('1.5.1');
 
     // Upload command
     program.command('upload')
